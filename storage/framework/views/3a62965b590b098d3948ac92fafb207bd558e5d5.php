@@ -1,0 +1,449 @@
+<?php $__env->startSection('page-title'); ?>
+    <?php echo e(__('Customer Home')); ?>
+
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
+<?php $__env->startSection('head-title'); ?>
+    <?php echo e(__('Welcome').', '.\Illuminate\Support\Facades\Auth::guard('customers')->user()->name); ?>
+
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
+    <!-- <div class="course-page hero-section">
+        <div class="container-lg">
+            <div class="row">
+                <div class="col-xl-6 col-lg-6">
+                    <div class="course-page-text">
+                        <div class="course-category">
+                            <div class="course-back">
+                                <a href="<?php echo e(route('store.slug',$store->slug)); ?>">
+                                    <i class="fa fa-angle-left" aria-hidden="true"></i>
+                                    <?php echo e(__('Back to home')); ?>
+
+                                </a>
+                            </div>
+                            <div class="design-span">
+                                <span><?php echo e(!empty($course->category_id->name)?$course->category_id->name:''); ?></span>
+                            </div>
+                        </div>
+                        <div class="category-heading">
+                            <h2><?php echo e(__('Products you purchased')); ?></h2>
+                            <p><?php echo e(__('Lorem Ipsum is simply dummy text of the printing and typesetting industry')); ?>. </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> -->
+    <?php if($storethemesetting['enable_header_img'] == 'on'): ?>
+        <section class="slice slice-xl bg-cover bg-size--cover home-banner" data-offset-top="#header-main" style="background-image: url(<?php echo e(asset(Storage::url('uploads/store_logo/'.(!empty($storethemesetting['header_img'])?$storethemesetting['header_img']:'home-banner.png')))); ?>); background-position: center center;">
+            <span class="mask bg-dark opacity-3"></span>
+            <div class="container py-6">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 text-center">
+                        <h2 class="h1 text-white store-title">
+                            <?php echo e(__('Order detail')); ?>
+
+                        </h2>
+
+                        <a href="<?php echo e(route('customer.home',$store->slug)); ?>" class="btn btn-white btn-white btn-icon rounded-pill hover-translate-y-n3 mt-4" id="pro_scroll">
+                            <span class="btn-inner--text"><?php echo e(__('Back to order')); ?></span>
+                            <span class="btn-inner--icon"><i class="fas fa-angle-right"></i></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+    <section class="slice slice-lg delimiter-bottom">
+        <div class="container">
+                <div class="mt-4">
+                    <div id="printableArea">
+                        <div class="row">
+                            <div class=" col-6 pb-2 invoice_logo"></div>
+                            <div class=" col-6 pb-2 delivered_Status text-right">
+                                <?php if($order->status == 'pending'): ?>
+                                    <button class="btn btn-sm btn-success"><?php echo e(__('Pending')); ?></button>
+                                <?php elseif($order->status == 'Cancel Order'): ?>
+                                    <button class="btn btn-sm btn-danger"><?php echo e(__('Order Canceled')); ?></button>
+                                <?php else: ?>
+                                    <button class="btn btn-sm btn-success"><?php echo e(__('Delivered')); ?></button>
+                                <?php endif; ?>
+                            </div>
+                            <div class="col-lg-8">
+                                <div class="card">
+                                    <div class="card-header border-0">
+                                        <h6 class="mb-0"><?php echo e(__('Items from Order')); ?> <?php echo e($order->order_id); ?></h6>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table mb-0">
+                                            <thead class="thead-light">
+                                            <tr>
+                                                <th><?php echo e(__('Item')); ?></th>
+                                                <th><?php echo e(__('Quantity')); ?></th>
+                                                <th><?php echo e(__('Price')); ?></th>
+                                                <th><?php echo e(__('Total')); ?></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <?php
+                                                $sub_tax = 0;
+                                                $total = 0;
+                                            ?>
+                                            <?php $__currentLoopData = $order_products; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key=>$product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <?php if($product->variant_id != 0): ?>
+                                                    <tr>
+                                                        <td class="total">
+                                                        <span class="h6 text-sm">
+                                                            <?php echo e($product->product_name .' - ( '.$product->variant_name.' )'); ?>
+
+                                                        </span>
+                                                            <?php if(!empty($product->tax)): ?>
+                                                                <?php
+                                                                    $total_tax=0;
+                                                                ?>
+                                                                <?php $__currentLoopData = $product->tax; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tax): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                                    <?php
+                                                                        $sub_tax = ($product->variant_price* $product->quantity * $tax->tax) / 100;
+                                                                        $total_tax += $sub_tax;
+                                                                    ?>
+                                                                    <?php echo e($tax->tax_name.' '.$tax->tax.'%'.' ('.$sub_tax.')'); ?>
+
+                                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                            <?php else: ?>
+                                                                <?php
+                                                                    $total_tax = 0
+                                                                ?>
+                                                            <?php endif; ?>
+
+                                                        </td>
+                                                        <td>
+                                                            <?php echo e($product->quantity); ?>
+
+                                                        </td>
+                                                        <td>
+                                                            <?php echo e(App\Models\Utility::priceFormat($product->variant_price)); ?>
+
+                                                        </td>
+                                                        <td>
+                                                            <?php echo e(App\Models\Utility::priceFormat($product->variant_price*$product->quantity+$total_tax)); ?>
+
+                                                        </td>
+                                                    </tr>
+                                                <?php else: ?>
+                                                    <tr>
+                                                        <td class="total">
+                                                        <span class="h6 text-sm">
+                                                            <?php echo e($product->product_name); ?>
+
+                                                        </span>
+                                                            <?php if(!empty($product->tax)): ?>
+                                                                <?php
+                                                                    $total_tax=0;
+                                                                ?>
+                                                                <?php $__currentLoopData = $product->tax; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tax): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                                    <?php
+                                                                        $sub_tax = ($product->price* $product->quantity * $tax->tax) / 100;
+                                                                        $total_tax += $sub_tax;
+                                                                    ?>
+                                                                    <?php echo e($tax->tax_name.' '.$tax->tax.'%'.' ('.$sub_tax.')'); ?>
+
+                                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                            <?php else: ?>
+                                                                <?php
+                                                                    $total_tax = 0
+                                                                ?>
+                                                            <?php endif; ?>
+
+                                                        </td>
+                                                        <td>
+                                                            <?php echo e($product->quantity); ?>
+
+                                                        </td>
+                                                        <td>
+                                                            <?php echo e(App\Models\Utility::priceFormat($product->price)); ?>
+
+                                                        </td>
+                                                        <td>
+                                                            <?php echo e(App\Models\Utility::priceFormat($product->price*$product->quantity+$total_tax)); ?>
+
+                                                        </td>
+                                                    </tr>
+                                                <?php endif; ?>
+                                                <?php if($order->status == 'delivered' && !empty($product->downloadable_prodcut)): ?>
+                                                <tr>
+                                                    <td colspan="4">
+                                                         <div class="card card-body mb-0 py-0">
+                                                            <div class="card my-5 bg-secondary">
+                                                                <div class="card-body">
+                                                                    <div class="row justify-content-between align-items-center">
+                                                                        <div class="col-md-6 order-md-2 mb-4 mb-md-0">
+                                                                            <div class="d-flex align-items-center justify-content-md-end">
+                                                                                <button data-id="<?php echo e($order->id); ?>" data-value="<?php echo e(asset(Storage::url('uploads/downloadable_prodcut'.'/'.$product->downloadable_prodcut))); ?>" class="btn btn-sm btn-primary downloadable_prodcut"><?php echo e(__('Download')); ?></button>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6 order-md-1">
+                                                                            <span class="h6 text-muted d-inline-block mr-3 mb-0"></span>
+                                                                            <span class="h5 mb-0"><?php echo e(__('Get your product from here')); ?></span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <?php endif; ?>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card">
+                                    <div class="card-header border-0">
+                                        <h6 class="mb-0"><?php echo e(__('Items from Order '). $order->order_id); ?></h6>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table mb-0">
+                                            <thead class="thead-light">
+
+                                            </thead>
+                                            <tbody>
+                                            <tr>
+                                                <td><?php echo e(__('Sub Total')); ?> :</td>
+                                                <td><?php echo e(App\Models\Utility::priceFormat($sub_total)); ?></td>
+                                            </tr>
+                                            <tr>
+                                                <td><?php echo e(__('Estimated Tax')); ?> :</td>
+                                                <td><?php echo e(App\Models\Utility::priceFormat($final_taxs)); ?></td>
+                                            </tr>
+                                            <?php if(!empty($discount_price)): ?>
+                                                <tr>
+                                                    <td><?php echo e(__('Apply Coupon')); ?> :</td>
+                                                    <td><?php echo e($discount_price); ?></td>
+                                                </tr>
+                                            <?php endif; ?>
+                                            <?php if(!empty($shipping_data)): ?>
+                                                <?php if(!empty($discount_value)): ?>
+                                                    <tr>
+                                                        <td><?php echo e(__('Shipping Price')); ?> :</td>
+                                                        <td><?php echo e(App\Models\Utility::priceFormat($shipping_data->shipping_price)); ?></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th><?php echo e(__('Grand Total')); ?> :</th>
+                                                        <th><?php echo e(\App\Models\Utility::priceFormat($order->price)); ?></th>
+                                                    </tr>
+                                                <?php else: ?>
+                                                    <tr>
+                                                        <td><?php echo e(__('Shipping Price')); ?> :</td>
+                                                        <td><?php echo e(App\Models\Utility::priceFormat($shipping_data->shipping_price)); ?></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th><?php echo e(__('Grand Total')); ?> :</th>
+                                                        <th><?php echo e(App\Models\Utility::priceFormat($sub_total + $shipping_data->shipping_price + $final_taxs)); ?></th>
+                                                    </tr>
+                                                <?php endif; ?>
+                                            <?php elseif(!empty($discount_value)): ?>
+                                                <tr>
+                                                    <th><?php echo e(__('Grand  Total')); ?> :</th>
+                                                    <th><?php echo e(App\Models\Utility::priceFormat($grand_total-$discount_value)); ?></th>
+                                                </tr>
+                                            <?php else: ?>
+                                                <tr>
+                                                    <th><?php echo e(__('Grand  Total')); ?> :</th>
+                                                    <th><?php echo e(App\Models\Utility::priceFormat($grand_total)); ?></th>
+                                                </tr>
+                                            <?php endif; ?>
+
+                                            <th><?php echo e(__('Payment Type')); ?> :</th>
+                                            <th><?php echo e($order['payment_type']); ?></th>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="card card-fluid">
+                                    <div class="card-body">
+                                        <h6 class="mb-4"><?php echo e(__('Shipping Information')); ?></h6>
+                                        <address class="mb-0 text-sm">
+                                            <dl class="row mt-4 align-items-center">
+                                                <dt class="col-sm-3 h6 text-sm"><?php echo e(__('Company')); ?></dt>
+                                                <dd class="col-sm-9 text-sm"> <?php echo e($user_details->shipping_address); ?></dd>
+                                                <dt class="col-sm-3 h6 text-sm"><?php echo e(__('City')); ?></dt>
+                                                <dd class="col-sm-9 text-sm"><?php echo e($user_details->shipping_city); ?></dd>
+                                                <dt class="col-sm-3 h6 text-sm"><?php echo e(__('Country')); ?></dt>
+                                                <dd class="col-sm-9 text-sm"> <?php echo e($user_details->shipping_country); ?></dd>
+                                                <dt class="col-sm-3 h6 text-sm"><?php echo e(__('Postal Code')); ?></dt>
+                                                <dd class="col-sm-9 text-sm"><?php echo e($user_details->shipping_postalcode); ?></dd>
+                                                <dt class="col-sm-3 h6 text-sm"><?php echo e(__('Phone')); ?></dt>
+                                                <dd class="col-sm-9 text-sm"><?php echo e($user_details->phone); ?></dd>
+                                                <?php if(!empty($location_data && $shipping_data)): ?>
+                                                    <dt class="col-sm-3 h6 text-sm"><?php echo e(__('Location')); ?></dt>
+                                                    <dd class="col-sm-9 text-sm"><?php echo e($location_data->name); ?></dd>
+                                                    <dt class="col-sm-3 h6 text-sm"><?php echo e(__('Shipping Method')); ?></dt>
+                                                    <dd class="col-sm-9 text-sm"><?php echo e($shipping_data->shipping_name); ?></dd>
+                                                <?php endif; ?>
+                                            </dl>
+                                        </address>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card card-fluid">
+                                    <div class="card-body">
+                                        <h6 class="mb-4"><?php echo e(__('Billing Information')); ?></h6>
+                                        <dl class="row mt-4 align-items-center">
+                                            <dt class="col-sm-3 h6 text-sm"><?php echo e(__('Company')); ?></dt>
+                                            <dd class="col-sm-9 text-sm"> <?php echo e($user_details->billing_address); ?></dd>
+                                            <dt class="col-sm-3 h6 text-sm"><?php echo e(__('City')); ?></dt>
+                                            <dd class="col-sm-9 text-sm"><?php echo e($user_details->billing_city); ?></dd>
+                                            <dt class="col-sm-3 h6 text-sm"><?php echo e(__('Country')); ?></dt>
+                                            <dd class="col-sm-9 text-sm"> <?php echo e($user_details->billing_country); ?></dd>
+                                            <dt class="col-sm-3 h6 text-sm"><?php echo e(__('Postal Code')); ?></dt>
+                                            <dd class="col-sm-9 text-sm"><?php echo e($user_details->billing_postalcode); ?></dd>
+                                            <dt class="col-sm-3 h6 text-sm"><?php echo e(__('Phone')); ?></dt>
+                                            <dd class="col-sm-9 text-sm"><?php echo e($user_details->phone); ?></dd>
+                                            <?php if(!empty($location_data && $shipping_data)): ?>
+                                                <dt class="col-sm-3 h6 text-sm"><?php echo e(__('Location')); ?></dt>
+                                                <dd class="col-sm-9 text-sm"><?php echo e($location_data->name); ?></dd>
+                                                <dt class="col-sm-3 h6 text-sm"><?php echo e(__('Shipping Method')); ?></dt>
+                                                <dd class="col-sm-9 text-sm"><?php echo e($shipping_data->shipping_name); ?></dd>
+                                            <?php endif; ?>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card card-fluid">
+                                    <div class="card-body">
+                                        <h6 class="mb-4"><?php echo e(__('Extra Information')); ?></h6>
+                                        <dl class="row mt-4 align-items-center">
+                                            <dt class="col-sm-3 h6 text-sm"><?php echo e($store_payment_setting['custom_field_title_1']); ?></dt>
+                                            <dd class="col-sm-9 text-sm"> <?php echo e($user_details->custom_field_title_1); ?></dd>
+                                            <dt class="col-sm-3 h6 text-sm"><?php echo e($store_payment_setting['custom_field_title_2']); ?></dt>
+                                            <dd class="col-sm-9 text-sm"> <?php echo e($user_details->custom_field_title_2); ?></dd>
+                                            <dt class="col-sm-3 h6 text-sm"><?php echo e($store_payment_setting['custom_field_title_3']); ?></dt>
+                                            <dd class="col-sm-9 text-sm"><?php echo e($user_details->custom_field_title_3); ?></dd>
+                                            <dt class="col-sm-3 h6 text-sm"><?php echo e($store_payment_setting['custom_field_title_4']); ?></dt>
+                                            <dd class="col-sm-9 text-sm"> <?php echo e($user_details->custom_field_title_4); ?></dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </section>
+<?php $__env->stopSection(); ?>
+<?php $__env->startPush('script-page'); ?>
+    <script>
+        $(".add_to_cart").click(function (e) {
+            e.preventDefault();
+            var id = $(this).attr('data-id');
+            var variants = [];
+            $(".variant-selection").each(function (index, element) {
+                variants.push(element.value);
+            });
+
+            if (jQuery.inArray('', variants) != -1) {
+                show_toastr('Error', "<?php echo e(__('Please select all option.')); ?>", 'error');
+                return false;
+            }
+            var variation_ids = $('#variant_id').val();
+
+            $.ajax({
+                url: '<?php echo e(route('user.addToCart', ['__product_id',$store->slug,'variation_id'])); ?>'.replace('__product_id', id).replace('variation_id', variation_ids ?? 0),
+                type: "POST",
+                data: {
+                    "_token": "<?php echo e(csrf_token()); ?>",
+                    variants: variants.join(' : '),
+                },
+                success: function (response) {
+                    if (response.status == "Success") {
+                        show_toastr('Success', response.success, 'success');
+                        $("#shoping_counts").html(response.item_count);
+                    } else {
+                        show_toastr('Error', response.error, 'error');
+                    }
+                },
+                error: function (result) {
+                    console.log('error');
+                }
+            });
+        });
+
+        $(document).on('click', '.add_to_wishlist', function (e) {
+            e.preventDefault();
+            var id = $(this).attr('data-id');
+            $.ajax({
+                type: "POST",
+                url: '<?php echo e(route('store.addtowishlist', [$store->slug,'__product_id'])); ?>'.replace('__product_id', id),
+                data: {
+                    "_token": "<?php echo e(csrf_token()); ?>",
+                },
+                success: function (response) {
+
+                    if (response.status == "Success") {
+
+                        show_toastr('Success', response.message, 'success');
+                        $('.wishlist_' + response.id).removeClass('add_to_wishlist');
+                        $('.wishlist_' + response.id).html('<i class="fas fa-heart"></i>');
+                        $('.wishlist_count').html(response.count);
+                    } else {
+                        console.log(response.status);
+                        show_toastr('Error', response.error, 'error');
+                    }
+                },
+                error: function (result) {
+                }
+            });
+        });
+
+        $(".productTab").click(function (e) {
+            e.preventDefault();
+            $('.productTab').removeClass('active')
+
+        });
+
+        $("#pro_scroll").click(function () {
+            $('html, body').animate({
+                scrollTop: $("#pro_items").offset().top
+            }, 1000);
+        });
+
+        $(document).on('click', '.downloadable_prodcut', function () {
+
+        var download_product = $(this).attr('data-value');
+        var order_id = $(this).attr('data-id');
+
+        var data = {
+            download_product: download_product,
+            order_id: order_id,
+        }
+
+        $.ajax({
+            url: '<?php echo e(route('user.downloadable_prodcut',$store->slug)); ?>',
+            method: 'POST',
+            data: data,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function (data) {
+                if (data.status == 'success') {
+                    show_toastr("success", data.message+'<br> <b>'+data.msg+'<b>', data["status"]);
+                    $('.downloadab_msg').html('<span class="text-success">' + data.msg + '</sapn>');
+                } else {
+                    show_toastr("Error", data.message+'<br> <b>'+data.msg+'<b>', data["status"]);
+                }
+            }
+        });
+    });
+    </script>
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('storefront.layout.theme1', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /home/u389444621/domains/viraz.co/public_html/resources/views/storefront/theme1/customer/custuserorder.blade.php ENDPATH**/ ?>
